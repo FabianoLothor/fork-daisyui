@@ -28,13 +28,18 @@ export const pluginOptionsHandler = (() => {
         if (flags.includes("--default")) {
           selector = `:where(${root}),${selector}`
         }
-        addBase({ [selector]: theme })
+        const themeWithFlags = { ...theme }
+        if (flags.includes("--default")) {
+          themeWithFlags["--default-theme"] = themeName
+        }
+        addBase({ [selector]: themeWithFlags })
 
         if (flags.includes("--prefersdark")) {
           // Use :root:not([data-theme]) for dark mode specificity
           const darkSelector =
             root === ":root" ? ":root:not([data-theme])" : `${root}:not([data-theme])`
-          addBase({ "@media (prefers-color-scheme: dark)": { [darkSelector]: theme } })
+          const darkThemeWithFlags = { ...theme, "--prefers-dark-theme": themeName }
+          addBase({ "@media (prefers-color-scheme: dark)": { [darkSelector]: darkThemeWithFlags } })
         }
       }
     }
@@ -47,7 +52,8 @@ export const pluginOptionsHandler = (() => {
       if (themesObject["dark"]) {
         const darkSelector =
           root === ":root" ? ":root:not([data-theme])" : `${root}:not([data-theme])`
-        addBase({ "@media (prefers-color-scheme: dark)": { [darkSelector]: themesObject["dark"] } })
+        const darkWithFlags = { ...themesObject["dark"], "--prefers-dark-theme": "dark" }
+        addBase({ "@media (prefers-color-scheme: dark)": { [darkSelector]: darkWithFlags } })
       }
 
       themeOrder.forEach((themeName) => {
@@ -79,9 +85,8 @@ export const pluginOptionsHandler = (() => {
         if (flags.includes("--prefersdark")) {
           const darkSelector =
             root === ":root" ? ":root:not([data-theme])" : `${root}:not([data-theme])`
-          addBase({
-            "@media (prefers-color-scheme: dark)": { [darkSelector]: themesObject[themeName] },
-          })
+          const darkWithFlags = { ...themesObject[themeName], "--prefers-dark-theme": themeName }
+          addBase({ "@media (prefers-color-scheme: dark)": { [darkSelector]: darkWithFlags } })
         }
       })
 
